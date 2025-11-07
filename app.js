@@ -3,10 +3,9 @@ import dotenv from "dotenv";
 import connection from "./connection/db.js";
 import router from "./routes/authRoutes.js";
 
-const PORT = process.env.PORT || 8000;
-
 // config
 dotenv.config();
+const PORT = process.env.PORT || 8000;
 
 //database
 connection();

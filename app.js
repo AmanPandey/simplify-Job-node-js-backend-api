@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import connection from "./connection/db.js";
 import router from "./routes/authRoutes.js";
+import cors from "cors";
 
 // config
 dotenv.config();
@@ -11,6 +12,11 @@ const PORT = process.env.PORT || 8000;
 connection();
 
 const app = express();
+
+// ✅ Allow all origins and methods
+app.use(cors());
+
+// Middleware
 app.use(express.json());
 
 //routes

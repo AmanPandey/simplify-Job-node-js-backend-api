@@ -283,3 +283,41 @@ export const updateEmployer = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+// delete employer
+export const deleteEmployer = async (req, res) => {
+  try {
+    const id = req.query.id?.trim();
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Employer ID is required." });
+    }
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Employer ID format." });
+    }
+
+    const employerExist = await Employers.findById(id);
+    if (!employerExist) {
+      return res
+        .status(404)
+        .json({ success: false, message: `Employer not found with ID: ${id}` });
+    }
+    const deletedEmployer = await Employers.findByIdAndDelete(id);
+    if (!deletedEmployer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer not found" });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Employer deleted successfully.",
+      employer: deletedEmployer,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};

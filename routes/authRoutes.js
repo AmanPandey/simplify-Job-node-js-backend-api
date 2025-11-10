@@ -7,6 +7,7 @@ import {
   getAllEmployers,
   updateEmployer,
   getEmployer,
+  deleteEmployer,
 } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/jwt.js";
 
@@ -34,5 +35,8 @@ router.get("/getAllEmployers", verifyToken, getAllEmployers);
 
 // update employer
 router.put("/updateEmployer", verifyToken, updateEmployer);
+
+// delete employer
+router.post("/deleteEmployer", verifyToken, deleteEmployer);
 
 export default router;

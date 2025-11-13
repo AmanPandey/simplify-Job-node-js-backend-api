@@ -1,5 +1,5 @@
 import express from "express";
-import multer from "multer";
+
 import {
   registerUser,
   loginUser,
@@ -13,7 +13,6 @@ import {
   deleteEmployer,
 } from "../controllers/employerController.js";
 import { verifyToken } from "../middleware/jwt.js";
-import upload from "../middleware/uploadsMiddleware.js";
 
 const router = express.Router();
 
@@ -29,13 +28,7 @@ router.get("/verifyToken", verifyToken, verifyTokenController);
 
 //! EMPLOYERS
 // add employer
-router.post(
-  "/addEmployer",
-  verifyToken,
-  upload.single("company_logo"),
-
-  addEmployer
-);
+router.post("/addEmployer", verifyToken, addEmployer);
 
 // get employer
 router.get("/getEmployer", verifyToken, getEmployer);
@@ -44,13 +37,7 @@ router.get("/getEmployer", verifyToken, getEmployer);
 router.get("/getAllEmployers", verifyToken, getAllEmployers);
 
 // update employer
-router.put(
-  "/updateEmployer",
-  verifyToken,
-  upload.single("company_logo"),
-
-  updateEmployer
-);
+router.put("/updateEmployer", verifyToken, updateEmployer);
 
 // delete employer
 router.delete("/deleteEmployer", verifyToken, deleteEmployer);

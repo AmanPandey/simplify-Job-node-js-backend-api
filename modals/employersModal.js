@@ -40,10 +40,10 @@ const employersSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    company_logo: {
-      type: String,
-      required: true,
-    },
+    // company_logo: {
+    //   type: String,
+    //   required: true,
+    // },
     description: {
       type: String,
       trim: true,

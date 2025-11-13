@@ -10,26 +10,6 @@ export const addEmployer = async (req, res) => {
   try {
     const employerData = req.body;
     const userId = req.loggedInUser?.id;
-    const deleteUploadedFile = () => {
-      if (req.file) {
-        const uploadedPath = path.join(
-          process.cwd(),
-          "uploads",
-          req.file.filename
-        );
-        fs.unlink(uploadedPath, (err) => {
-          if (err)
-            console.warn("⚠️ Failed to delete uploaded logo:", err.message);
-        });
-      }
-    };
-
-    // Require logo
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Company Logo is required" });
-    }
 
     // Required fields
     const requiredFields = [
@@ -42,7 +22,6 @@ export const addEmployer = async (req, res) => {
     ];
     for (const field of requiredFields) {
       if (!employerData[field]) {
-        deleteUploadedFile();
         return res.status(400).json({
           success: false,
           message: `${field
@@ -57,18 +36,16 @@ export const addEmployer = async (req, res) => {
       email: employerData.email,
     });
     if (existingEmployer) {
-      deleteUploadedFile();
       return res
         .status(400)
         .json({ success: false, message: "Employer already exists." });
     }
 
     // Create employer
-    const logopath = `/uploads/${req.file.filename}`;
+
     const newEmployer = await Employers.create({
       ...employerData,
       createdBy: userId,
-      company_logo: logopath,
     });
 
     res.status(201).json({
@@ -77,14 +54,6 @@ export const addEmployer = async (req, res) => {
       employer: newEmployer,
     });
   } catch (error) {
-    if (req.file) {
-      const uploadedPath = path.join(
-        process.cwd(),
-        "uploads",
-        req.file.filename
-      );
-      fs.unlink(uploadedPath, () => {});
-    }
     console.error(" Error adding employer:", error.message);
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -144,31 +113,14 @@ export const updateEmployer = async (req, res) => {
   try {
     const id = req.query.id?.trim();
 
-    //  delete uploaded file if something fails
-    const deleteUploadedFile = () => {
-      if (req.file) {
-        const uploadedPath = path.join(
-          process.cwd(),
-          "uploads",
-          req.file.filename
-        );
-        fs.unlink(uploadedPath, (err) => {
-          if (err)
-            console.warn("⚠️ Failed to remove uploaded logo:", err.message);
-        });
-      }
-    };
-
     // Validate ID
     if (!id) {
-      deleteUploadedFile();
       return res
         .status(400)
         .json({ success: false, message: "Employer ID is required." });
     }
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      deleteUploadedFile();
       return res
         .status(400)
         .json({ success: false, message: "Invalid Employer ID format." });
@@ -177,7 +129,6 @@ export const updateEmployer = async (req, res) => {
     // Check if employer exists
     const employerExist = await Employers.findById(id);
     if (!employerExist) {
-      deleteUploadedFile();
       return res
         .status(404)
         .json({ success: false, message: `Employer not found with ID: ${id}` });
@@ -193,7 +144,6 @@ export const updateEmployer = async (req, res) => {
       });
 
       if (existingEmail) {
-        deleteUploadedFile();
         return res.status(400).json({
           success: false,
           message: "Email already in use by another employer.",
@@ -201,24 +151,8 @@ export const updateEmployer = async (req, res) => {
       }
     }
 
-    // Handle logo update
-    if (req.file) {
-      const newLogoPath = `/uploads/${req.file.filename}`;
-      if (employerExist.company_logo) {
-        const oldLogoPath = path.join(
-          process.cwd(),
-          employerExist.company_logo.replace(/^\//, "")
-        );
-        fs.unlink(oldLogoPath, (err) => {
-          if (err) console.warn("⚠️ Failed to delete old logo:", err.message);
-        });
-      }
-      updates.company_logo = newLogoPath;
-    }
-
     // Prevent empty updates
-    if (!req.file && (!updates || Object.keys(updates).length === 0)) {
-      deleteUploadedFile();
+    if (!updates || Object.keys(updates).length === 0) {
       return res
         .status(400)
         .json({ success: false, message: "No update data provided." });
@@ -231,7 +165,6 @@ export const updateEmployer = async (req, res) => {
     });
 
     if (!updatedEmployer) {
-      deleteUploadedFile();
       return res
         .status(404)
         .json({ success: false, message: "Employer not found." });
@@ -243,14 +176,6 @@ export const updateEmployer = async (req, res) => {
       employer: updatedEmployer,
     });
   } catch (error) {
-    if (req.file) {
-      const uploadedPath = path.join(
-        process.cwd(),
-        "uploads",
-        req.file.filename
-      );
-      fs.unlink(uploadedPath, () => {});
-    }
     console.error(" Error updating employer:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
@@ -284,24 +209,13 @@ export const deleteEmployer = async (req, res) => {
         .json({ success: false, message: "Employer not found." });
     }
 
-    // Delete company logo if exists
-    if (deletedEmployer.company_logo) {
-      const logoPath = path.join(
-        process.cwd(),
-        deletedEmployer.company_logo.replace(/^\//, "")
-      );
-      fs.unlink(logoPath, (err) => {
-        if (err) console.warn("⚠️ Failed to delete logo:", err.message);
-      });
-    }
-
     res.status(200).json({
       success: true,
       message: "Employer deleted successfully.",
       employer: deletedEmployer,
     });
   } catch (error) {
-    console.error("❌ Error deleting employer:", error.message);
+    console.error(" Error deleting employer:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };

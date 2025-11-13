@@ -16,7 +16,7 @@ const app = express();
 // ✅ Allow all origins and methods
 app.use(cors());
 
-// app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 // Middleware
 app.use(express.json());

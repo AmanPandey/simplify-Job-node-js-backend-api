@@ -185,16 +185,20 @@ export const updateEmployer = async (req, res) => {
 
     const updates = req.body || {};
 
-    // Check if email belongs to another employer
-    const existingEmail = await Employers.findOne({
-      email: updates.email,
-    });
-    if (existingEmail) {
-      deleteUploadedFile();
-      return res.status(400).json({
-        success: false,
-        message: "Email already in use by another employer.",
+    // Safe email duplicate check
+    if (updates.email && updates.email !== employerExist.email) {
+      const existingEmail = await Employers.findOne({
+        email: updates.email,
+        _id: { $ne: id },
       });
+
+      if (existingEmail) {
+        deleteUploadedFile();
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use by another employer.",
+        });
+      }
     }
 
     // Handle logo update
